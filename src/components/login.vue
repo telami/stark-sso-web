@@ -24,7 +24,7 @@
                                         placeholder="请输入用户名"
                                         v-decorator="[
                 'username',
-                {rules: [{ required: true, message: '请输入用户名' }, { validator: handleUsernameOrEmail }], validateTrigger: 'change'}
+                {rules: [{ required: true, message: '请输入用户名' }], validateTrigger: 'change'}
               ]"
                                 >
                                     <a-icon slot="prefix" type="user" :style="{ color: 'rgba(0,0,0,.25)' }"/>
@@ -94,15 +94,15 @@
                         </a-tab-pane>
                     </a-tabs>
 
-                    <a-form-item>
-                        <a-checkbox v-decorator="['rememberMe']">自动登录</a-checkbox>
-                        <router-link
-                                :to="{ name: 'recover', params: { user: 'aaa'} }"
-                                class="forge-password"
-                                style="float: right;"
-                        >忘记密码
-                        </router-link>
-                    </a-form-item>
+<!--                    <a-form-item>-->
+<!--                        <a-checkbox v-decorator="['rememberMe']">自动登录</a-checkbox>-->
+<!--                        <router-link-->
+<!--                                :to="{ name: 'recover', params: { user: 'aaa'} }"-->
+<!--                                class="forge-password"-->
+<!--                                style="float: right;"-->
+<!--                        >忘记密码-->
+<!--                        </router-link>-->
+<!--                    </a-form-item>-->
 
                     <a-form-item style="margin-top:24px">
                         <a-button
@@ -133,7 +133,7 @@
                         <a>
                             <a-icon class="item-icon" type="weibo-circle"></a-icon>
                         </a>
-                        <router-link class="register" :to="{ name: 'register' }">注册账户</router-link>
+<!--                        <router-link class="register" :to="{ name: 'register' }">注册账户</router-link>-->
                     </div>
                 </a-form>
             </a-row>
@@ -142,13 +142,8 @@
 </template>
 
 <script>
-    import axios from 'axios'
-    import qs from 'qs'
+    import {login} from '../api/login'
 
-    const service = axios.create({
-        timeout: 5000, // 请求的超时时间
-        withCredentials: true // 允许携带cookie
-    })
     export default {
         name: "login",
         data: function () {
@@ -195,12 +190,15 @@
 
                 validateFields(validateFieldsKey, { force: true }, (err, values) => {
                     if (!err) {
-                        console.log('login form', values)
                         const loginParams = { ...values }
                         delete loginParams.username
                         loginParams[!state.loginType ? 'email' : 'username'] = values.username
                         loginParams.password = values.password
-                        this.loginUsername(loginParams)
+                        login(loginParams).then(res => {
+                          console.log(res)
+                          window.location.href = res.message
+                          this.state.loginBtn = false
+                        })
                     } else {
                         setTimeout(() => {
                             state.loginBtn = false
@@ -211,27 +209,6 @@
             handleTabClick(key) {
                 this.customActiveKey = key
                 // this.form.resetFields()
-            },
-            loginUsername(data) {
-                service({
-                    method: "post",
-                    url: "http://www.dapideng.com/login?response_type=code&client_id=XnRFHdwI7KmOQ5nZ&redirect_uri=https://www.telami.cn&scope=USER_INFO",
-                    data: qs.stringify(data)
-                }).then(res => {
-                    console.log(res.data)
-                    console.log(res.data.message)
-                    window.location.href = res.data.message
-                    this.state.loginBtn = false
-                })
-            },
-            loginMobile() {
-                service.get('http://localhost/login/mobile?mobile=17694873618&smsCode=057699', {
-                    headers: {
-                        'Authorization': 'Basic WG5SRkhkd0k3S21PUTVuWjpDNk85S20yTkRYOFZ0blp5dWRBZ0Y4RTZHU2lPM2VrRg==',
-                        'deviceId': 123131
-                    }
-                }).then(res => console.log(res))
-                // axios.get('http://localhost/auth/code/sms').then(res => console.log(res))
             },
             getUrlParam(type) {
                 if (type === 'code') {
