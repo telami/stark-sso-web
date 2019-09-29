@@ -22,3 +22,23 @@ export function me() {
     method: 'get'
   })
 }
+
+export function qq(code, state) {
+  return axios({
+    url: '/auth/qq?code=' + code + "&state=" + state,
+    method: 'get',
+    headers: {
+      'deviceId': new Date().getTime()
+    }
+  })
+}
+
+export function alipay(code) {
+  return axios({
+    url: '/auth/alipay?code=' + code,
+    method: 'get',
+    headers: {
+      'deviceId': new Date().getTime()
+    }
+  })
+}

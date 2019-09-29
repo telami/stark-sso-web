@@ -106,22 +106,18 @@
 
                     <div class="user-login-other">
                         <span>其他登录方式</span>
-                        <a href="http://www.dapideng.com/auth/alipay">
-                            <a-icon class="item-icon" type="alipay-circle"></a-icon>
-                        </a>
+                        <a-icon class="item-icon" type="alipay-circle" @click="redirectToAlipay"></a-icon>
                         <a href="/auth/weibo">
                             <a-icon class="item-icon" type="weibo-circle"></a-icon>
                         </a>
                         <a href="/auth/dingtalk">
                             <a-icon class="item-icon" type="dingding"></a-icon>
                         </a>
-                        <a href="http://www.dapideng.com/auth/qq?response_type=code&client_id=XnRFHdwI7KmOQ5nZ&redirect_uri=https://www.telami.cn&scope=USER_INFO&state=123">
-                            <a-icon class="item-icon" type="qq"></a-icon>
-                        </a>
+                        <a-icon class="item-icon" type="qq" @click="redirectToQq"></a-icon>
                         <a>
                             <a-icon class="item-icon" type="weibo-circle"></a-icon>
                         </a>
-<!--                        <router-link class="register" :to="{ name: 'register' }">注册账户</router-link>-->
+                        <!--                        <router-link class="register" :to="{ name: 'register' }">注册账户</router-link>-->
                     </div>
                 </a-form>
             </a-row>
@@ -130,7 +126,7 @@
 </template>
 
 <script>
-  import {login} from '../api/login'
+  import {login, qq, alipay} from '../api/login'
 
   const domain = 'http://sso.dapideng.com/uaa';
 
@@ -188,7 +184,7 @@
                   window.location.href = res.message
                   this.state.loginBtn = false
                 }
-              }else {
+              } else {
                 this.requestFailed(res)
               }
             }).catch(err => this.requestFailed(err))
@@ -231,6 +227,14 @@
           return window.location.href.match(/state=(\S*)/)[1];
         }
       },
+      redirectToQq() {
+        console.log(domain + '/auth/qq' + this.oauth2Params)
+        window.location.href = domain + '/auth/qq' + this.oauth2Params
+      },
+      redirectToAlipay() {
+        console.log(domain + '/auth/alipay' + this.oauth2Params)
+        window.location.href = domain + '/auth/alipay' + this.oauth2Params
+      },
       qqLogin() {
         let url = window.location.href;
         if (url.search("/qq/callback") === -1) {
@@ -242,13 +246,7 @@
         if (!code) {
           return;
         }
-        fetch('http://www.dapideng.com/auth/qq?code=' + this.getUrlParam('code') + "&state=" + this.getUrlParam('state'), {
-          headers: {
-            'Authorization': 'Basic WG5SRkhkd0k3S21PUTVuWjpDNk85S20yTkRYOFZ0blp5dWRBZ0Y4RTZHU2lPM2VrRg==',
-            'deviceId': new Date().getTime()
-          },
-          method: 'GET', // *GET, POST, PUT, DELETE, etc.
-        }).then(res => {
+        qq(this.getUrlParam('code'), this.getUrlParam('state')).then(res => {
           console.log(res.json())
           console.log(res.code)
           console.log(res.message)
@@ -313,7 +311,7 @@
         if (!code) {
           return;
         }
-        fetch('http://www.dapideng.com/auth/dingtalk?code=' + code, {
+        fetch('http://sso.dapideng.com/uaa/auth/dingtalk?code=' + code, {
           headers: {
             'Authorization': 'Basic WG5SRkhkd0k3S21PUTVuWjpDNk85S20yTkRYOFZ0blp5dWRBZ0Y4RTZHU2lPM2VrRg==',
             'deviceId': new Date().getTime()
@@ -341,22 +339,20 @@
         if (!code) {
           return;
         }
-        fetch('http://www.dapideng.com/auth/alipay?code=' + code, {
-          headers: {
-            'Authorization': 'Basic WG5SRkhkd0k3S21PUTVuWjpDNk85S20yTkRYOFZ0blp5dWRBZ0Y4RTZHU2lPM2VrRg==',
-            'deviceId': new Date().getTime()
-          },
-          method: 'GET', // *GET, POST, PUT, DELETE, etc.
-        }).then(res => res.json())
-          .catch(error => {
-            console.error('Error:', error)
-            console.log(error.data)
-          })
-          .then(response => {
-            console.log('Success:', response)
-            console.log('data:', response.data)
-            this.avatar = response.data.avatar
-          });
+        alipay(code).then(res => {
+          console.log(res)
+          console.log(res.code === 200)
+          if (res.code === 200) {
+            if (res.message === domain) {
+              this.loginSuccess()
+            } else {
+              window.location.href = res.message
+              this.state.loginBtn = false
+            }
+          } else {
+            this.requestFailed(res)
+          }
+        })
       }
     }
   }
