@@ -335,11 +335,13 @@
         }
         console.log(url)
         let code = window.location.href.match(/auth_code=(\S*)/)[1];
+        let state = window.location.href.match(/state=(\S*)&scope/)[1];
         console.log(code)
+        console.log(state)
         if (!code) {
           return;
         }
-        alipay(code).then(res => {
+        alipay(code,state).then(res => {
           console.log(res)
           console.log(res.code === 200)
           if (res.code === 200) {

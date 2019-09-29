@@ -33,9 +33,9 @@ export function qq(code, state) {
   })
 }
 
-export function alipay(code) {
+export function alipay(code, state) {
   return axios({
-    url: '/auth/alipay?code=' + code,
+    url: '/auth/alipay?code=' + code + "&state=" + state,
     method: 'get',
     headers: {
       'deviceId': new Date().getTime()
