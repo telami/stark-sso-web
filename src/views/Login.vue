@@ -15,8 +15,6 @@
                             @change="handleTabClick"
                     >
                         <a-tab-pane key="tab1" tab="用户名密码登录">
-                            <a-alert v-if="isLoginError" type="error" showIcon style="margin-bottom: 24px;"
-                                     message="用户名或密码错误"/>
                             <a-form-item>
                                 <a-input
                                         size="large"
@@ -94,16 +92,6 @@
                         </a-tab-pane>
                     </a-tabs>
 
-                    <!--                    <a-form-item>-->
-                    <!--                        <a-checkbox v-decorator="['rememberMe']">自动登录</a-checkbox>-->
-                    <!--                        <router-link-->
-                    <!--                                :to="{ name: 'recover', params: { user: 'aaa'} }"-->
-                    <!--                                class="forge-password"-->
-                    <!--                                style="float: right;"-->
-                    <!--                        >忘记密码-->
-                    <!--                        </router-link>-->
-                    <!--                    </a-form-item>-->
-
                     <a-form-item style="margin-top:24px">
                         <a-button
                                 size="large"
@@ -133,7 +121,7 @@
                         <a>
                             <a-icon class="item-icon" type="weibo-circle"></a-icon>
                         </a>
-                        <!--                        <router-link class="register" :to="{ name: 'register' }">注册账户</router-link>-->
+<!--                        <router-link class="register" :to="{ name: 'register' }">注册账户</router-link>-->
                     </div>
                 </a-form>
             </a-row>
@@ -144,30 +132,28 @@
 <script>
   import {login} from '../api/login'
 
+  const domain = 'http://sso.dapideng.com/uaa';
+
   export default {
     name: "login",
     data: function () {
       return {
         customActiveKey: 'tab1',
         loginBtn: false,
-        // login type: 0 email, 1 username, 2 telephone
-        loginType: 0,
-        isLoginError: false,
+        // login type: 1 username, 2 telephone
+        loginType: 1,
         requiredTwoStepCaptcha: false,
         stepCaptchaVisible: false,
         form: this.$form.createForm(this),
-        oauth2Params:'',
+        oauth2Params: '',
         state: {
           time: 60,
           loginBtn: false,
-          // login type: 0 email, 1 username, 2 telephone
+          // login type: 1 username, 2 telephone
           loginType: 1,
           smsSendBtn: false
         }
       }
-    },
-    beforeCreate() {
-      this.form = this.$form.createForm(this);
     },
     mounted() {
       this.qqLogin();
@@ -175,7 +161,7 @@
       this.weiboLogin();
       this.dingtalkLogin();
       this.alipayLogin();
-      this.snifferOauth2Param()
+      this.getOauth2Param()
     },
     methods: {
       handleSubmit(e) {
@@ -196,11 +182,21 @@
             delete loginParams.username
             loginParams[!state.loginType ? 'email' : 'username'] = values.username
             loginParams.password = values.password
-            login(loginParams,this.oauth2Params).then(res => {
-              console.log(res)
-              window.location.href = res.message
-              this.state.loginBtn = false
-            })
+            login(loginParams, this.oauth2Params).then(res => {
+              if (res.code === 200) {
+                if (res.message === domain) {
+                  this.loginSuccess(res)
+                } else {
+                  window.location.href = res.message
+                  this.state.loginBtn = false
+                }
+              }else {
+                this.requestFailed(res)
+              }
+            }).catch(err => this.requestFailed(err))
+              .finally(() => {
+                state.loginBtn = false
+              })
           } else {
             setTimeout(() => {
               state.loginBtn = false
@@ -212,7 +208,23 @@
         this.customActiveKey = key
         // this.form.resetFields()
       },
-      snifferOauth2Param(){
+      loginSuccess(res) {
+        console.log(res)
+        this.$router.push({name: 'about'}, () => {
+          this.$notification.success({
+            message: '欢迎',
+            description: '欢迎回来'
+          })
+        })
+      },
+      requestFailed(err) {
+        this.$notification['error']({
+          message: '错误',
+          description: err.message || '请求出现错误，请稍后再试',
+          duration: 4
+        })
+      },
+      getOauth2Param() {
         let params = window.location.search;
         if (!params.search("redirect_uri")) {
           return
