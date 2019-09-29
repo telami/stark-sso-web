@@ -142,8 +142,6 @@
         loginBtn: false,
         // login type: 1 username, 2 telephone
         loginType: 1,
-        requiredTwoStepCaptcha: false,
-        stepCaptchaVisible: false,
         form: this.$form.createForm(this),
         oauth2Params: '',
         state: {
@@ -185,7 +183,7 @@
             login(loginParams, this.oauth2Params).then(res => {
               if (res.code === 200) {
                 if (res.message === domain) {
-                  this.loginSuccess(res)
+                  this.loginSuccess()
                 } else {
                   window.location.href = res.message
                   this.state.loginBtn = false
@@ -208,14 +206,8 @@
         this.customActiveKey = key
         // this.form.resetFields()
       },
-      loginSuccess(res) {
-        console.log(res)
-        this.$router.push({name: 'about'}, () => {
-          this.$notification.success({
-            message: '欢迎',
-            description: '欢迎回来'
-          })
-        })
+      loginSuccess() {
+        this.$router.push({name: 'about'})
       },
       requestFailed(err) {
         this.$notification['error']({

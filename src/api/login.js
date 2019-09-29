@@ -15,3 +15,10 @@ export function loginMobile(mobile, code) {
     method: 'get'
   })
 }
+
+export function me() {
+  return axios({
+    url: '/user/me',
+    method: 'get'
+  })
+}
