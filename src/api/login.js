@@ -1,11 +1,25 @@
 import {axios} from '@/utils/request'
 import qs from 'qs'
 
-export function login(parameter, oauth2Params) {
+export function login(parameter, oauth2Params, deviceId) {
   return axios({
     url: '/login' + oauth2Params,
     method: 'post',
+    headers: {
+      'deviceId': deviceId
+    },
     data: qs.stringify(parameter)
+  })
+}
+
+
+export function getImageCode(deviceId) {
+  return axios({
+    url: '/auth/code/image',
+    method: 'post',
+    headers: {
+      'deviceId': deviceId
+    }
   })
 }
 

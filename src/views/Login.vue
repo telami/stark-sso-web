@@ -19,7 +19,7 @@
                                 <a-input
                                         size="large"
                                         type="text"
-                                        placeholder="请输入用户名"
+                                        placeholder="用户名"
                                         v-decorator="[
                 'username',
                 {rules: [{ required: true, message: '请输入用户名' }], validateTrigger: 'change'}
@@ -34,7 +34,7 @@
                                         size="large"
                                         type="password"
                                         autocomplete="false"
-                                        placeholder="请输入密码"
+                                        placeholder="密码"
                                         v-decorator="[
                 'password',
                 {rules: [{ required: true, message: '请输入密码' }], validateTrigger: 'blur'}
@@ -43,6 +43,19 @@
                                     <a-icon slot="prefix" type="lock" :style="{ color: 'rgba(0,0,0,.25)' }"/>
                                 </a-input>
                             </a-form-item>
+                            <a-row :gutter="16">
+                                <a-col class="gutter-row" :span="16">
+                                    <a-form-item>
+                                        <a-input size="large" type="text" placeholder="验证码"
+                                                 v-decorator="['imageCode', {rules: [{ required: true, message: '请输入验证码' }], validateTrigger: 'blur'}]">
+                                            <a-icon slot="prefix" type="safety" :style="{ color: 'rgba(0,0,0,.25)' }"/>
+                                        </a-input>
+                                    </a-form-item>
+                                </a-col>
+                                <a-col class="gutter-row" :span="8">
+                                    <img :src="imageCode" :key="imageCodeKey" @click="getImage"/>
+                                </a-col>
+                            </a-row>
                         </a-tab-pane>
                         <a-tab-pane key="tab2" tab="手机号登录">
                             <a-form-item>
@@ -126,7 +139,7 @@
 </template>
 
 <script>
-  import {login, qq, alipay} from '../api/login'
+  import {login, qq, alipay, getImageCode} from '../api/login'
 
   const domain = 'http://sso.dapideng.com/uaa';
 
@@ -140,6 +153,9 @@
         loginType: 1,
         form: this.$form.createForm(this),
         oauth2Params: '',
+        imageCode: '',
+        imageCodeKey: '',
+        deviceId: '',
         state: {
           time: 60,
           loginBtn: false,
@@ -155,7 +171,8 @@
       this.weiboLogin();
       this.dingtalkLogin();
       this.alipayLogin();
-      this.getOauth2Param()
+      this.getOauth2Param();
+      this.getImage();
     },
     methods: {
       handleSubmit(e) {
@@ -168,15 +185,16 @@
 
         state.loginBtn = true
 
-        const validateFieldsKey = customActiveKey === 'tab1' ? ['username', 'password'] : ['mobile', 'captcha']
+        const validateFieldsKey = customActiveKey === 'tab1' ? ['username', 'password', 'imageCode'] : ['mobile', 'captcha']
 
         validateFields(validateFieldsKey, {force: true}, (err, values) => {
           if (!err) {
             const loginParams = {...values}
             delete loginParams.username
             loginParams[!state.loginType ? 'email' : 'username'] = values.username
-            loginParams.password = values.password
-            login(loginParams, this.oauth2Params).then(res => {
+            loginParams.password = values.password;
+            loginParams.imageCode = values.imageCode;
+            login(loginParams, this.oauth2Params, this.deviceId).then(res => {
               if (res.code === 200) {
                 if (res.message === domain) {
                   this.loginSuccess()
@@ -227,6 +245,13 @@
           return window.location.href.match(/state=(\S*)/)[1];
         }
       },
+      getImage() {
+        this.deviceId = new Date().getTime();
+        getImageCode(this.deviceId).then((res) => {
+          this.imageCode = 'data:image/jpg;base64,' + res.data;
+          this.imageCodeKey = new Date().getTime();
+        });
+      },
       redirectToQq() {
         console.log(domain + '/auth/qq' + this.oauth2Params)
         window.location.href = domain + '/auth/qq' + this.oauth2Params
@@ -247,10 +272,16 @@
           return;
         }
         qq(this.getUrlParam('code'), this.getUrlParam('state')).then(res => {
-          console.log(res.json())
-          console.log(res.code)
-          console.log(res.message)
-          window.location.href = res.message
+          if (res.code === 200) {
+            if (res.message === domain) {
+              this.loginSuccess()
+            } else {
+              window.location.href = res.message
+              this.state.loginBtn = false
+            }
+          } else {
+            this.requestFailed(res)
+          }
         })
       },
       osChinaLogin() {
@@ -341,9 +372,8 @@
         if (!code) {
           return;
         }
-        alipay(code,state).then(res => {
+        alipay(code, state).then(res => {
           console.log(res)
-          console.log(res.code === 200)
           if (res.code === 200) {
             if (res.message === domain) {
               this.loginSuccess()
@@ -365,11 +395,10 @@
         position: absolute;
         width: 100%;
         height: 100%;
-        top: 0;
-        left: 0;
-        overflow-y: auto;
-        background: url(../assets/bg.png) no-repeat;
-        background-size: cover;
+        background: #8360c3; /* fallback for old browsers */
+        background: -webkit-linear-gradient(to top, #2ebf91, #8360c3); /* Chrome 10-25, Safari 5.1-6 */
+        background: linear-gradient(to top, #2ebf91, #8360c3); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
 
         .main {
             min-width: 260px;
