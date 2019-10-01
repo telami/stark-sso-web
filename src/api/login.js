@@ -37,22 +37,42 @@ export function me() {
   })
 }
 
-export function qq(code, state) {
+export function qq(code, state, deviceId) {
   return axios({
     url: '/auth/qq?code=' + code + "&state=" + state,
     method: 'get',
     headers: {
-      'deviceId': new Date().getTime()
+      'deviceId': deviceId
     }
   })
 }
 
-export function alipay(code, state) {
+export function alipay(code, state, deviceId) {
   return axios({
     url: '/auth/alipay?code=' + code + "&state=" + state,
     method: 'get',
     headers: {
-      'deviceId': new Date().getTime()
+      'deviceId': deviceId
+    }
+  })
+}
+
+export function dingtalk(code, state, deviceId) {
+  return axios({
+    url: '/auth/dingtalk?code=' + code + "&state=" + state,
+    method: 'get',
+    headers: {
+      'deviceId': deviceId
+    }
+  })
+}
+
+export function weibo(code, state, deviceId) {
+  return axios({
+    url: '/auth/weibo?code=' + code + "&state=" + state,
+    method: 'get',
+    headers: {
+      'deviceId': deviceId
     }
   })
 }

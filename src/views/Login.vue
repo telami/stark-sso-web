@@ -120,12 +120,8 @@
                     <div class="user-login-other">
                         <span>其他登录方式</span>
                         <a-icon class="item-icon" type="alipay-circle" @click="redirectToAlipay"></a-icon>
-                        <a href="/auth/weibo">
-                            <a-icon class="item-icon" type="weibo-circle"></a-icon>
-                        </a>
-                        <a href="/auth/dingtalk">
-                            <a-icon class="item-icon" type="dingding"></a-icon>
-                        </a>
+                        <a-icon class="item-icon" type="weibo-circle" @click="redirectToWeibo"></a-icon>
+                        <a-icon class="item-icon" type="dingding" @click="redirectToDingtalk"></a-icon>
                         <a-icon class="item-icon" type="qq" @click="redirectToQq"></a-icon>
                         <a>
                             <a-icon class="item-icon" type="weibo-circle"></a-icon>
@@ -139,7 +135,7 @@
 </template>
 
 <script>
-  import {login, qq, alipay, getImageCode} from '../api/login'
+  import {login, qq, alipay, dingtalk, weibo, getImageCode} from '../api/login'
 
   const socialRedirectUrl = 'http://sso.dapideng.com/api/uaa';
 
@@ -262,6 +258,14 @@
         console.log(socialRedirectUrl + '/auth/alipay' + this.oauth2Params)
         window.location.href = socialRedirectUrl + '/auth/alipay' + this.oauth2Params
       },
+      redirectToDingtalk() {
+        console.log(socialRedirectUrl + '/auth/dingtalk' + this.oauth2Params)
+        window.location.href = socialRedirectUrl + '/auth/dingtalk' + this.oauth2Params
+      },
+      redirectToWeibo() {
+        console.log(socialRedirectUrl + '/auth/weibo' + this.oauth2Params)
+        window.location.href = socialRedirectUrl + '/auth/weibo' + this.oauth2Params
+      },
       qqLogin() {
         let url = window.location.href;
         if (url.search("/qq/callback") === -1) {
@@ -273,18 +277,7 @@
         if (!code) {
           return;
         }
-        qq(this.getUrlParam('code'), this.getUrlParam('state')).then(res => {
-          if (res.code === 200) {
-            if (res.message.length === 0) {
-              this.loginSuccess()
-            } else {
-              window.location.href = socialRedirectUrl + res.message
-              this.state.loginBtn = false
-            }
-          } else {
-            this.requestFailed(res)
-          }
-        })
+        qq(this.getUrlParam('code'), this.getUrlParam('state'), this.deviceId).then(res => this.authenticationSuccess(res))
       },
       osChinaLogin() {
         let url = window.location.href;
@@ -316,22 +309,7 @@
         if (!code) {
           return;
         }
-        fetch('http://www.dapideng.com/auth/weibo?code=' + code, {
-          headers: {
-            'Authorization': 'Basic WG5SRkhkd0k3S21PUTVuWjpDNk85S20yTkRYOFZ0blp5dWRBZ0Y4RTZHU2lPM2VrRg==',
-            'deviceId': new Date().getTime()
-          },
-          method: 'GET', // *GET, POST, PUT, DELETE, etc.
-        }).then(res => res.json())
-          .catch(error => {
-            console.error('Error:', error)
-            console.log(error.data)
-          })
-          .then(response => {
-            console.log('Success:', response)
-            console.log('data:', response.data)
-            this.avatar = response.data.avatar
-          });
+        weibo(code, this.getUrlParam('state'), this.deviceId).then(res => this.authenticationSuccess(res))
       },
       dingtalkLogin: function () {
         let url = window.location.href;
@@ -339,27 +317,12 @@
           return
         }
         console.log(url)
-        let code = this.getUrlParam();
+        let code = this.getUrlParam('code');
         console.log(code)
         if (!code) {
           return;
         }
-        fetch('http://sso.dapideng.com/uaa/auth/dingtalk?code=' + code, {
-          headers: {
-            'Authorization': 'Basic WG5SRkhkd0k3S21PUTVuWjpDNk85S20yTkRYOFZ0blp5dWRBZ0Y4RTZHU2lPM2VrRg==',
-            'deviceId': new Date().getTime()
-          },
-          method: 'GET', // *GET, POST, PUT, DELETE, etc.
-        }).then(res => res.json())
-          .catch(error => {
-            console.error('Error:', error)
-            console.log(error.data)
-          })
-          .then(response => {
-            console.log('Success:', response)
-            console.log('data:', response.data)
-            this.avatar = response.data.avatar
-          });
+        dingtalk(code, this.getUrlParam('state'), this.deviceId).then(res => this.authenticationSuccess(res))
       },
       alipayLogin: function () {
         let url = window.location.href;
@@ -374,19 +337,19 @@
         if (!code) {
           return;
         }
-        alipay(code, state).then(res => {
-          console.log(res)
-          if (res.code === 200) {
-            if (res.message.length === 0) {
-              this.loginSuccess()
-            } else {
-              window.location.href = socialRedirectUrl + res.message
-              this.state.loginBtn = false
-            }
+        alipay(code, state, this.deviceId).then.then(res => this.authenticationSuccess(res))
+      },
+      authenticationSuccess(res) {
+        if (res.code === 200) {
+          if (res.message.length === 0) {
+            this.loginSuccess()
           } else {
-            this.requestFailed(res)
+            window.location.href = socialRedirectUrl + res.message
+            this.state.loginBtn = false
           }
-        })
+        } else {
+          this.requestFailed(res)
+        }
       }
     }
   }
