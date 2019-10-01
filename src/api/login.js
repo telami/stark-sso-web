@@ -16,7 +16,7 @@ export function login(parameter, oauth2Params, deviceId) {
 export function getImageCode(deviceId) {
   return axios({
     url: '/auth/code/image',
-    method: 'post',
+    method: 'get',
     headers: {
       'deviceId': deviceId
     }

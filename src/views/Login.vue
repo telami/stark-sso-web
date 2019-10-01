@@ -141,7 +141,7 @@
 <script>
   import {login, qq, alipay, getImageCode} from '../api/login'
 
-  const domain = 'http://sso.dapideng.com/uaa';
+  const socialRedirectUrl = 'http://sso.dapideng.com/api/uaa';
 
   export default {
     name: "login",
@@ -196,10 +196,11 @@
             loginParams.imageCode = values.imageCode;
             login(loginParams, this.oauth2Params, this.deviceId).then(res => {
               if (res.code === 200) {
-                if (res.message === domain) {
+                if (res.message === '') {
+                  //return ''
                   this.loginSuccess()
                 } else {
-                  window.location.href = res.message
+                  window.location.href = socialRedirectUrl + res.message
                   this.state.loginBtn = false
                 }
               } else {
@@ -224,6 +225,7 @@
         this.$router.push({name: 'about'})
       },
       requestFailed(err) {
+        this.getImage();
         this.$notification['error']({
           message: '错误',
           description: err.message || '请求出现错误，请稍后再试',
@@ -253,12 +255,12 @@
         });
       },
       redirectToQq() {
-        console.log(domain + '/auth/qq' + this.oauth2Params)
-        window.location.href = domain + '/auth/qq' + this.oauth2Params
+        console.log(socialRedirectUrl + '/auth/qq' + this.oauth2Params)
+        window.location.href = socialRedirectUrl + '/auth/qq' + this.oauth2Params
       },
       redirectToAlipay() {
-        console.log(domain + '/auth/alipay' + this.oauth2Params)
-        window.location.href = domain + '/auth/alipay' + this.oauth2Params
+        console.log(socialRedirectUrl + '/auth/alipay' + this.oauth2Params)
+        window.location.href = socialRedirectUrl + '/auth/alipay' + this.oauth2Params
       },
       qqLogin() {
         let url = window.location.href;
@@ -273,10 +275,10 @@
         }
         qq(this.getUrlParam('code'), this.getUrlParam('state')).then(res => {
           if (res.code === 200) {
-            if (res.message === domain) {
+            if (res.message.length === 0) {
               this.loginSuccess()
             } else {
-              window.location.href = res.message
+              window.location.href = socialRedirectUrl + res.message
               this.state.loginBtn = false
             }
           } else {
@@ -375,10 +377,10 @@
         alipay(code, state).then(res => {
           console.log(res)
           if (res.code === 200) {
-            if (res.message === domain) {
+            if (res.message.length === 0) {
               this.loginSuccess()
             } else {
-              window.location.href = res.message
+              window.location.href = socialRedirectUrl + res.message
               this.state.loginBtn = false
             }
           } else {
