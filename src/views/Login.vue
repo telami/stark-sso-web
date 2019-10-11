@@ -135,7 +135,7 @@
 </template>
 
 <script>
-  import {login, qq, alipay, dingtalk, weibo, getImageCode} from '../api/login'
+  import {login, dingtalk, weibo, getImageCode} from '../api/login'
 
   const socialRedirectUrl = 'http://sso.dapideng.com/api/uaa';
 
@@ -162,11 +162,9 @@
       }
     },
     mounted() {
-      this.qqLogin();
       this.osChinaLogin();
       this.weiboLogin();
       this.dingtalkLogin();
-      this.alipayLogin();
       this.getOauth2Param();
       this.getImage();
     },
@@ -266,19 +264,6 @@
         console.log(socialRedirectUrl + '/auth/weibo' + this.oauth2Params)
         window.location.href = socialRedirectUrl + '/auth/weibo' + this.oauth2Params
       },
-      qqLogin() {
-        let url = window.location.href;
-        if (url.search("/qq/callback") === -1) {
-          return
-        }
-        console.log(url)
-        let code = this.getUrlParam('code');
-        console.log(code)
-        if (!code) {
-          return;
-        }
-        qq(this.getUrlParam('code'), this.getUrlParam('state'), this.deviceId).then(res => this.authenticationSuccess(res))
-      },
       osChinaLogin() {
         let url = window.location.href;
         if (url.search("/oschina/callback") === -1) {
@@ -323,21 +308,6 @@
           return;
         }
         dingtalk(code, this.getUrlParam('state'), this.deviceId).then(res => this.authenticationSuccess(res))
-      },
-      alipayLogin: function () {
-        let url = window.location.href;
-        if (url.search("/alipay/callback") === -1) {
-          return
-        }
-        console.log(url)
-        let code = window.location.href.match(/auth_code=(\S*)/)[1];
-        let state = window.location.href.match(/state=(\S*)&scope/)[1];
-        console.log(code)
-        console.log(state)
-        if (!code) {
-          return;
-        }
-        alipay(code, state, this.deviceId).then.then(res => this.authenticationSuccess(res))
       },
       authenticationSuccess(res) {
         if (res.code === 200) {
