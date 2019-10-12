@@ -76,3 +76,13 @@ export function weibo(code, state, deviceId) {
     }
   })
 }
+
+export function oschina(code, state, deviceId) {
+  return axios({
+    url: '/auth/oschina?code=' + code + "&state=" + state,
+    method: 'get',
+    headers: {
+      'deviceId': deviceId
+    }
+  })
+}

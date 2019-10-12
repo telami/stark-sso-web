@@ -123,9 +123,7 @@
                         <a-icon class="item-icon" type="weibo-circle" @click="redirectToWeibo"></a-icon>
                         <a-icon class="item-icon" type="dingding" @click="redirectToDingtalk"></a-icon>
                         <a-icon class="item-icon" type="qq" @click="redirectToQq"></a-icon>
-                        <a>
-                            <a-icon class="item-icon" type="weibo-circle"></a-icon>
-                        </a>
+                        <a-icon class="item-icon" type="weibo-circle" @click="redirectToOschina"></a-icon>
                         <!--                        <router-link class="register" :to="{ name: 'register' }">注册账户</router-link>-->
                     </div>
                 </a-form>
@@ -135,7 +133,7 @@
 </template>
 
 <script>
-  import {login, dingtalk, weibo, getImageCode} from '../api/login'
+  import {login, getImageCode} from '../api/login'
 
   const socialRedirectUrl = 'http://sso.dapideng.com/api/uaa';
 
@@ -162,9 +160,6 @@
       }
     },
     mounted() {
-      this.osChinaLogin();
-      this.weiboLogin();
-      this.dingtalkLogin();
       this.getOauth2Param();
       this.getImage();
     },
@@ -232,14 +227,6 @@
           return
         }
         this.oauth2Params = params
-        console.log(params)
-      },
-      getUrlParam(type) {
-        if (type === 'code') {
-          return window.location.href.match(/code=(\S*)&state/)[1];
-        } else if (type === 'state') {
-          return window.location.href.match(/state=(\S*)/)[1];
-        }
       },
       getImage() {
         this.deviceId = new Date().getTime();
@@ -249,65 +236,19 @@
         });
       },
       redirectToQq() {
-        console.log(socialRedirectUrl + '/auth/qq' + this.oauth2Params)
         window.location.href = socialRedirectUrl + '/auth/qq' + this.oauth2Params
       },
       redirectToAlipay() {
-        console.log(socialRedirectUrl + '/auth/alipay' + this.oauth2Params)
         window.location.href = socialRedirectUrl + '/auth/alipay' + this.oauth2Params
       },
       redirectToDingtalk() {
-        console.log(socialRedirectUrl + '/auth/dingtalk' + this.oauth2Params)
         window.location.href = socialRedirectUrl + '/auth/dingtalk' + this.oauth2Params
       },
       redirectToWeibo() {
-        console.log(socialRedirectUrl + '/auth/weibo' + this.oauth2Params)
         window.location.href = socialRedirectUrl + '/auth/weibo' + this.oauth2Params
       },
-      osChinaLogin() {
-        let url = window.location.href;
-        if (url.search("/oschina/callback") === -1) {
-          return
-        }
-        console.log(url)
-        let code = this.getUrlParam();
-        console.log(code)
-        if (!code) {
-          return;
-        }
-        fetch('http://www.dapideng.com/auth/oschina?code=' + this.getUrlParam(), {
-          headers: {
-            'Authorization': 'Basic WG5SRkhkd0k3S21PUTVuWjpDNk85S20yTkRYOFZ0blp5dWRBZ0Y4RTZHU2lPM2VrRg==',
-            'deviceId': new Date().getTime()
-          },
-          method: 'GET', // *GET, POST, PUT, DELETE, etc.
-        }).then(response => console.log(response.json()))
-      },
-      weiboLogin: function () {
-        let url = window.location.href;
-        if (url.search("/weibo/callback") === -1) {
-          return
-        }
-        console.log(url)
-        let code = window.location.href.match(/code=(\S*)/)[1];
-        console.log(code)
-        if (!code) {
-          return;
-        }
-        weibo(code, this.getUrlParam('state'), this.deviceId).then(res => this.authenticationSuccess(res))
-      },
-      dingtalkLogin: function () {
-        let url = window.location.href;
-        if (url.search("/dingtalk/callback") === -1) {
-          return
-        }
-        console.log(url)
-        let code = this.getUrlParam('code');
-        console.log(code)
-        if (!code) {
-          return;
-        }
-        dingtalk(code, this.getUrlParam('state'), this.deviceId).then(res => this.authenticationSuccess(res))
+      redirectToOschina() {
+        window.location.href = socialRedirectUrl + '/auth/oschina' + this.oauth2Params
       },
       authenticationSuccess(res) {
         if (res.code === 200) {
@@ -330,10 +271,8 @@
         position: absolute;
         width: 100%;
         height: 100%;
-        background: #8360c3; /* fallback for old browsers */
-        background: -webkit-linear-gradient(to top, #2ebf91, #8360c3); /* Chrome 10-25, Safari 5.1-6 */
-        background: linear-gradient(to top, #2ebf91, #8360c3); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-
+        background-image: url(../assets/bg.png);
+        background-color: #ffc773;
 
         .main {
             min-width: 260px;

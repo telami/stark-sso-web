@@ -10,7 +10,7 @@
 </template>
 
 <script>
-  import {qq, alipay, dingtalk, weibo} from '../api/login'
+  import {qq, alipay, dingtalk, weibo, oschina} from '../api/login'
 
   const socialRedirectUrl = 'http://sso.dapideng.com/api/uaa';
 
@@ -24,6 +24,9 @@
     mounted() {
       this.qqLogin();
       this.alipayLogin();
+      this.dingtalkLogin();
+      this.weiboLogin();
+      this.osChinaLogin();
     },
     methods: {
       getUrlParam(type) {
@@ -38,9 +41,7 @@
         if (url.search("/qq/callback") === -1) {
           return
         }
-        console.log(url)
         let code = this.getUrlParam('code');
-        console.log(code)
         if (!code) {
           return;
         }
@@ -51,15 +52,45 @@
         if (url.search("/alipay/callback") === -1) {
           return
         }
-        console.log(url)
         let code = window.location.href.match(/auth_code=(\S*)/)[1];
         let state = window.location.href.match(/state=(\S*)&scope/)[1];
-        console.log(code)
-        console.log(state)
         if (!code) {
           return;
         }
         alipay(code, state, this.deviceId).then(res => this.authenticationSuccess(res))
+      },
+      dingtalkLogin: function () {
+        let url = window.location.href;
+        if (url.search("/dingtalk/callback") === -1) {
+          return
+        }
+        let code = this.getUrlParam('code');
+        if (!code) {
+          return;
+        }
+        dingtalk(code, this.getUrlParam('state'), this.deviceId).then(res => this.authenticationSuccess(res))
+      },
+      osChinaLogin() {
+        let url = window.location.href;
+        if (url.search("/oschina/callback") === -1) {
+          return
+        }
+        let code = this.getUrlParam('code');
+        if (!code) {
+          return;
+        }
+        oschina(code, this.getUrlParam('state'), this.deviceId).then(res => this.authenticationSuccess(res))
+      },
+      weiboLogin: function () {
+        let url = window.location.href;
+        if (url.search("/weibo/callback") === -1) {
+          return
+        }
+        let code = window.location.href.match(/code=(\S*)/)[1];
+        if (!code) {
+          return;
+        }
+        weibo(code, this.getUrlParam('state'), this.deviceId).then(res => this.authenticationSuccess(res))
       },
       authenticationSuccess(res) {
         if (res.code === 200) {
