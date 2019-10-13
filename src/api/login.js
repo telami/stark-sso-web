@@ -23,10 +23,14 @@ export function getImageCode(deviceId) {
   })
 }
 
-export function loginMobile(mobile, code) {
+export function loginMobile(parameter, oauth2Params, deviceId) {
   return axios({
-    url: '/login/mobile?mobile=' + mobile + '&smsCode=' + code + '&response_type=code&client_id=XnRFHdwI7KmOQ5nZ&redirect_uri=https://www.telami.cn&scope=USER_INFO',
-    method: 'get'
+    url: '/login/mobile' + oauth2Params,
+    method: 'post',
+    headers: {
+      'deviceId': deviceId
+    },
+    data: qs.stringify(parameter)
   })
 }
 
@@ -80,6 +84,16 @@ export function weibo(code, state, deviceId) {
 export function oschina(code, state, deviceId) {
   return axios({
     url: '/auth/oschina?code=' + code + "&state=" + state,
+    method: 'get',
+    headers: {
+      'deviceId': deviceId
+    }
+  })
+}
+
+export function getSmsCaptcha(mobile, deviceId) {
+  return axios({
+    url: '/auth/code/sms?mobile=' + mobile,
     method: 'get',
     headers: {
       'deviceId': deviceId

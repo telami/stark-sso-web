@@ -68,26 +68,7 @@
                                 <a-col class="gutter-row" :span="16">
                                     <a-form-item>
                                         <a-input size="large" type="text" placeholder="验证码"
-                                                 v-decorator="['captcha', {rules: [{ required: true, message: '请输入验证码' }], validateTrigger: 'blur'}]">
-                                            <a-icon slot="prefix" type="mail" :style="{ color: 'rgba(0,0,0,.25)' }"/>
-                                        </a-input>
-                                    </a-form-item>
-                                </a-col>
-                                <a-col class="gutter-row" :span="8">
-                                    <a-button
-                                            class="getCaptcha"
-                                            tabindex="-1"
-                                            :disabled="state.smsSendBtn"
-                                            @click.stop.prevent="getCaptcha"
-                                            v-text="!state.smsSendBtn && '获取验证码' || (state.time+' s')"
-                                    ></a-button>
-                                </a-col>
-                            </a-row>
-                            <a-row :gutter="16">
-                                <a-col class="gutter-row" :span="16">
-                                    <a-form-item>
-                                        <a-input size="large" type="text" placeholder="验证码"
-                                                 v-decorator="['captcha', {rules: [{ required: true, message: '请输入验证码' }], validateTrigger: 'blur'}]">
+                                                 v-decorator="['smsCode', {rules: [{ required: true, message: '请输入验证码' }], validateTrigger: 'blur'}]">
                                             <a-icon slot="prefix" type="mail" :style="{ color: 'rgba(0,0,0,.25)' }"/>
                                         </a-input>
                                     </a-form-item>
@@ -123,7 +104,7 @@
                         <a-icon class="item-icon" type="weibo-circle" @click="redirectToWeibo"></a-icon>
                         <a-icon class="item-icon" type="dingding" @click="redirectToDingtalk"></a-icon>
                         <a-icon class="item-icon" type="qq" @click="redirectToQq"></a-icon>
-                        <a-icon class="item-icon" type="weibo-circle" @click="redirectToOschina"></a-icon>
+                        <a-icon class="item-icon" type="dribbble" @click="redirectToOschina"></a-icon>
                         <!--                        <router-link class="register" :to="{ name: 'register' }">注册账户</router-link>-->
                     </div>
                 </a-form>
@@ -133,7 +114,7 @@
 </template>
 
 <script>
-  import {login, getImageCode} from '../api/login'
+  import {login, loginMobile, getImageCode, getSmsCaptcha} from '../api/login'
 
   const socialRedirectUrl = 'http://sso.dapideng.com/api/uaa';
 
@@ -174,31 +155,50 @@
 
         state.loginBtn = true
 
-        const validateFieldsKey = customActiveKey === 'tab1' ? ['username', 'password', 'imageCode'] : ['mobile', 'captcha']
+        const validateFieldsKey = customActiveKey === 'tab1' ? ['username', 'password', 'imageCode'] : ['mobile', 'smsCode']
 
         validateFields(validateFieldsKey, {force: true}, (err, values) => {
           if (!err) {
             const loginParams = {...values}
-            delete loginParams.username
-            loginParams[!state.loginType ? 'email' : 'username'] = values.username
-            loginParams.password = values.password;
-            loginParams.imageCode = values.imageCode;
-            login(loginParams, this.oauth2Params, this.deviceId).then(res => {
-              if (res.code === 200) {
-                if (res.message === '') {
-                  //return ''
-                  this.loginSuccess()
+            if (this.state.loginType === 1) {
+              loginParams.username = values.username
+              loginParams.password = values.password;
+              loginParams.imageCode = values.imageCode;
+              login(loginParams, this.oauth2Params, this.deviceId).then(res => {
+                if (res.code === 200) {
+                  if (res.message === '') {
+                    this.loginSuccess()
+                  } else {
+                    window.location.href = socialRedirectUrl + res.message
+                    this.state.loginBtn = false
+                  }
                 } else {
-                  window.location.href = socialRedirectUrl + res.message
-                  this.state.loginBtn = false
+                  this.requestFailed(res)
                 }
-              } else {
-                this.requestFailed(res)
-              }
-            }).catch(err => this.requestFailed(err))
-              .finally(() => {
-                state.loginBtn = false
-              })
+              }).catch(err => this.requestFailed(err))
+                .finally(() => {
+                  state.loginBtn = false
+                })
+            } else {
+              loginParams.mobile = values.mobile
+              loginParams.smsCode = values.smsCode
+              loginMobile(loginParams, this.oauth2Params, this.deviceId).then(res => {
+                if (res.code === 200) {
+                  if (res.message === '') {
+                    this.loginSuccess()
+                  } else {
+                    window.location.href = socialRedirectUrl + res.message
+                    this.state.loginBtn = false
+                  }
+                } else {
+                  this.requestFailed(res)
+                }
+              }).catch(err => this.requestFailed(err))
+                .finally(() => {
+                  state.loginBtn = false
+                })
+            }
+
           } else {
             setTimeout(() => {
               state.loginBtn = false
@@ -208,6 +208,7 @@
       },
       handleTabClick(key) {
         this.customActiveKey = key
+        this.state.loginType = key === 'tab1' ? 1 : 2
         // this.form.resetFields()
       },
       loginSuccess() {
@@ -234,6 +235,44 @@
           this.imageCode = 'data:image/jpg;base64,' + res.data;
           this.imageCodeKey = new Date().getTime();
         });
+      },
+      getCaptcha(e) {
+        e.preventDefault()
+        const {form: {validateFields}, state} = this
+
+        validateFields(['mobile'], {force: true}, (err, values) => {
+          if (!err) {
+            state.smsSendBtn = true
+
+            const interval = window.setInterval(() => {
+              if (state.time-- <= 0) {
+                state.time = 60
+                state.smsSendBtn = false
+                window.clearInterval(interval)
+              }
+            }, 1000)
+
+            const hide = this.$message.loading('验证码发送中..', 0)
+            getSmsCaptcha(values.mobile, this.deviceId).then(res => {
+              setTimeout(hide, 0)
+              if (res.code === 200) {
+                this.$notification['success']({
+                  message: '提示',
+                  description: '验证码获取成功，您的验证码为：' + res.data,
+                  duration: 8
+                })
+              } else {
+                this.requestFailed(res)
+              }
+            }).catch(err => {
+              setTimeout(hide, 1)
+              clearInterval(interval)
+              state.time = 60
+              state.smsSendBtn = false
+              this.requestFailed(err)
+            })
+          }
+        })
       },
       redirectToQq() {
         window.location.href = socialRedirectUrl + '/auth/qq' + this.oauth2Params
