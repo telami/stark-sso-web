@@ -310,8 +310,8 @@
         position: absolute;
         width: 100%;
         height: 100%;
-        background-image: url(../assets/bg.png);
-        background-color: #ffc773;
+        background: #f0f2f5 url(../assets/bg.svg) no-repeat 50%;
+        /*background-color: #ffc773;*/
 
         .main {
             min-width: 260px;
