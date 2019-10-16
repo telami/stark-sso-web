@@ -4,7 +4,7 @@ import notification from 'ant-design-vue/es/notification'
 // 创建 axios 实例
 const service = axios.create({
   baseURL: process.env.VUE_APP_API_BASE_URL + '/api/uaa', // api base_url
-  timeout: 6000,
+  timeout: 60000,
   withCredentials: true
 })
 
