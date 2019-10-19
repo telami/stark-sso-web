@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         <div class="main">
-            <BasicHeader></BasicHeader>
+            <BasicHeader/>
             <a-row>
                 <a-form
                         id="formLogin"
@@ -12,7 +12,7 @@
                 >
                     <a-tabs
                             :activeKey="customActiveKey"
-                            :tabBarStyle="{ textAlign: 'center', borderBottom: 'unset' }"
+                            :tabBarStyle="{ textAlign: 'left', borderBottom: 'unset' }"
                             @change="handleTabClick"
                     >
                         <a-tab-pane key="tab1" tab="用户名密码登录">
@@ -87,7 +87,7 @@
                         </a-tab-pane>
                     </a-tabs>
 
-                    <a-form-item style="margin-top:24px">
+                    <a-form-item>
                         <a-button
                                 size="large"
                                 type="primary"
@@ -323,48 +323,48 @@
             width: 368px;
             margin: 0 auto;
 
-        }
-    }
+            .user-layout-login {
+                label {
+                    font-size: 14px;
+                }
 
-    .user-layout-login {
-        label {
-            font-size: 14px;
-        }
+                .getCaptcha {
+                    display: block;
+                    width: 100%;
+                    height: 40px;
+                }
 
-        .getCaptcha {
-            display: block;
-            width: 100%;
-            height: 40px;
-        }
+                button.login-button {
+                    padding: 0 15px;
+                    font-size: 16px;
+                    height: 40px;
+                    width: 100%;
+                }
 
-        button.login-button {
-            padding: 0 15px;
-            font-size: 16px;
-            height: 40px;
-            width: 100%;
-        }
+                .user-login-other {
+                    text-align: left;
+                    margin-top: 24px;
+                    line-height: 22px;
 
-        .user-login-other {
-            text-align: left;
-            margin-top: 24px;
-            line-height: 22px;
+                    .item-icon {
+                        font-size: 24px;
+                        color: rgba(0, 0, 0, 0.2);
+                        margin-left: 16px;
+                        vertical-align: middle;
+                        cursor: pointer;
+                        transition: color 0.3s;
 
-            .item-icon {
-                font-size: 24px;
-                color: rgba(0, 0, 0, 0.2);
-                margin-left: 16px;
-                vertical-align: middle;
-                cursor: pointer;
-                transition: color 0.3s;
+                        &:hover {
+                            color: #1890ff;
+                        }
+                    }
 
-                &:hover {
-                    color: #1890ff;
+                    .register {
+                        float: right;
+                    }
                 }
             }
-
-            .register {
-                float: right;
-            }
         }
     }
+
 </style>
