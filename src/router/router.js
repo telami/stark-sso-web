@@ -9,23 +9,22 @@ export default new Router({
     {
       path: '/',
       name: 'login',
-      component: () => import(/* webpackChunkName: "about" */ '../views/Login.vue')
+      component: () => import('../views/login.vue')
     },
     {
       path: '/about',
       name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (about.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
+      component: () => import('../views/about.vue')
     },
     {
       path: '/redirect',
       name: 'redirect',
-      // route level code-splitting
-      // this generates a separate chunk (about.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "about" */ '../views/Redirect.vue')
+      component: () => import('../views/redirect.vue')
+    },
+    {
+      path: '/relate',
+      name: 'relate',
+      component: () => import('../views/relate.vue')
     }
   ]
 })

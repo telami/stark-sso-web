@@ -1,6 +1,7 @@
 <template>
-    <div class="body-bg">
+    <div class="container">
         <div class="main">
+            <BasicHeader></BasicHeader>
             <a-row>
                 <a-form
                         id="formLogin"
@@ -109,17 +110,21 @@
                     </div>
                 </a-form>
             </a-row>
+            <Footer/>
         </div>
     </div>
 </template>
 
 <script>
   import {login, loginMobile, getImageCode, getSmsCaptcha} from '../api/login'
+  import Footer from "@/components/basic-footer";
+  import BasicHeader from "@/components/basic-header";
 
   const socialRedirectUrl = 'http://sso.dapideng.com/api/uaa';
 
   export default {
     name: "login",
+    components: {BasicHeader, Footer},
     data: function () {
       return {
         customActiveKey: 'tab1',
@@ -306,18 +311,18 @@
 </script>
 
 <style lang="less" scoped>
-    .body-bg {
+    .container {
         position: absolute;
         width: 100%;
         height: 100%;
-        background: #f0f2f5 url(../assets/bg.svg) no-repeat 50%;
-        /*background-color: #ffc773;*/
+        background: #f0f2f5 url(../assets/bg.svg) no-repeat;
 
         .main {
+            height: 100%;
             min-width: 260px;
             width: 368px;
             margin: 0 auto;
-            padding-top: 10%;
+
         }
     }
 
@@ -330,10 +335,6 @@
             display: block;
             width: 100%;
             height: 40px;
-        }
-
-        .forge-password {
-            font-size: 14px;
         }
 
         button.login-button {
