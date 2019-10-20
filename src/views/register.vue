@@ -1,108 +1,110 @@
 <template>
-    <div class="main user-layout-register">
-        <h3><span>注册</span></h3>
-        <a-form ref="formRegister" :form="form" id="formRegister">
-            <a-form-item>
-                <a-input
-                        size="large"
-                        type="text"
-                        placeholder="邮箱"
-                        v-decorator="['email', {rules: [{ required: true, type: 'email', message: '请输入邮箱地址' }], validateTrigger: ['change', 'blur']}]"
-                ></a-input>
-            </a-form-item>
+    <div class="container">
+        <div class="main">
+            <BasicHeader/>
+            <h3 style="text-align: center;padding-bottom: 10px"><span>注册</span></h3>
 
-            <a-popover
-                    placement="rightTop"
-                    :trigger="['focus']"
-                    :getPopupContainer="(trigger) => trigger.parentElement"
-                    v-model="state.passwordLevelChecked">
-                <template slot="content">
-                    <div :style="{ width: '240px' }">
-                        <div :class="['user-register', passwordLevelClass]">强度：<span>{{ passwordLevelName }}</span>
+            <a-form ref="formRegister" :form="form" id="formRegister">
+                <a-form-item>
+                    <a-input
+                            size="large"
+                            type="text"
+                            placeholder="用户名"
+                            v-decorator="['username', {rules: [{ required: true, message: '请输入用户名' }], validateTrigger: ['change', 'blur']}]"
+                    ></a-input>
+                </a-form-item>
+
+                <a-popover
+                        placement="rightTop"
+                        :trigger="['focus']"
+                        :getPopupContainer="(trigger) => trigger.parentElement"
+                        v-model="state.passwordLevelChecked">
+                    <template slot="content">
+                        <div :style="{ width: '240px' }">
+                            <div :class="['user-register', passwordLevelClass]">
+                                强度：<span>{{ passwordLevelName }}</span>
+                            </div>
+                            <a-progress :percent="state.percent" :showInfo="false"
+                                        :strokeColor=" passwordLevelColor "/>
+                            <div style="margin-top: 10px;">
+                                <span>请至少输入 6 个字符,请不要使用容易被猜到的密码。</span>
+                            </div>
                         </div>
-                        <a-progress :percent="state.percent" :showInfo="false" :strokeColor=" passwordLevelColor "/>
-                        <div style="margin-top: 10px;">
-                            <span>请至少输入 6 个字符。请不要使用容易被猜到的密码。</span>
-                        </div>
-                    </div>
-                </template>
+                    </template>
+                    <a-form-item>
+                        <a-input
+                                size="large"
+                                type="password"
+                                @click="handlePasswordInputClick"
+                                autocomplete="false"
+                                placeholder="至少6位密码，区分大小写"
+                                v-decorator="['password', {rules: [{ required: true, message: '至少6位密码，区分大小写'}, { validator: this.handlePasswordLevel }], validateTrigger: ['change', 'blur']}]"
+                        ></a-input>
+                    </a-form-item>
+                </a-popover>
+
                 <a-form-item>
                     <a-input
                             size="large"
                             type="password"
-                            @click="handlePasswordInputClick"
                             autocomplete="false"
-                            placeholder="至少6位密码，区分大小写"
-                            v-decorator="['password', {rules: [{ required: true, message: '至少6位密码，区分大小写'}, { validator: this.handlePasswordLevel }], validateTrigger: ['change', 'blur']}]"
+                            placeholder="确认密码"
+                            v-decorator="['password2', {rules: [{ required: true, message: '至少6位密码，区分大小写' }, { validator: this.handlePasswordCheck }], validateTrigger: ['change', 'blur']}]"
                     ></a-input>
                 </a-form-item>
-            </a-popover>
 
-            <a-form-item>
-                <a-input
-                        size="large"
-                        type="password"
-                        autocomplete="false"
-                        placeholder="确认密码"
-                        v-decorator="['password2', {rules: [{ required: true, message: '至少6位密码，区分大小写' }, { validator: this.handlePasswordCheck }], validateTrigger: ['change', 'blur']}]"
-                ></a-input>
-            </a-form-item>
+                <a-form-item>
+                    <a-input size="large" placeholder="11 位手机号"
+                             v-decorator="['mobile', {rules: [{ required: true, message: '请输入正确的手机号', pattern: /^1[3456789]\d{9}$/ }, { validator: this.handlePhoneCheck } ], validateTrigger: ['change', 'blur'] }]">
+                        <a-select slot="addonBefore" size="large" defaultValue="+86">
+                            <a-select-option value="+86">+86</a-select-option>
+                        </a-select>
+                    </a-input>
+                </a-form-item>
 
-            <a-form-item>
-                <a-input size="large" placeholder="11 位手机号"
-                         v-decorator="['mobile', {rules: [{ required: true, message: '请输入正确的手机号', pattern: /^1[3456789]\d{9}$/ }, { validator: this.handlePhoneCheck } ], validateTrigger: ['change', 'blur'] }]">
-                    <a-select slot="addonBefore" size="large" defaultValue="+86">
-                        <a-select-option value="+86">+86</a-select-option>
-                        <a-select-option value="+87">+87</a-select-option>
-                    </a-select>
-                </a-input>
-            </a-form-item>
-            <!--<a-input-group size="large" compact>
-                  <a-select style="width: 20%" size="large" defaultValue="+86">
-                    <a-select-option value="+86">+86</a-select-option>
-                    <a-select-option value="+87">+87</a-select-option>
-                  </a-select>
-                  <a-input style="width: 80%" size="large" placeholder="11 位手机号"></a-input>
-                </a-input-group>-->
+                <a-row :gutter="16">
+                    <a-col class="gutter-row" :span="16">
+                        <a-form-item>
+                            <a-input size="large" type="text" placeholder="验证码"
+                                     v-decorator="['captcha', {rules: [{ required: true, message: '请输入验证码' }], validateTrigger: 'blur'}]">
+                                <a-icon slot="prefix" type="mail" :style="{ color: 'rgba(0,0,0,.25)' }"/>
+                            </a-input>
+                        </a-form-item>
+                    </a-col>
+                    <a-col class="gutter-row" :span="8">
+                        <a-button
+                                class="getCaptcha"
+                                size="large"
+                                :disabled="state.smsSendBtn"
+                                @click.stop.prevent="getCaptcha"
+                                v-text="!state.smsSendBtn && '获取验证码'||(state.time+' s')"></a-button>
+                    </a-col>
+                </a-row>
 
-            <a-row :gutter="16">
-                <a-col class="gutter-row" :span="16">
-                    <a-form-item>
-                        <a-input size="large" type="text" placeholder="验证码"
-                                 v-decorator="['captcha', {rules: [{ required: true, message: '请输入验证码' }], validateTrigger: 'blur'}]">
-                            <a-icon slot="prefix" type="mail" :style="{ color: 'rgba(0,0,0,.25)' }"/>
-                        </a-input>
-                    </a-form-item>
-                </a-col>
-                <a-col class="gutter-row" :span="8">
+                <a-form-item>
                     <a-button
-                            class="getCaptcha"
                             size="large"
-                            :disabled="state.smsSendBtn"
-                            @click.stop.prevent="getCaptcha"
-                            v-text="!state.smsSendBtn && '获取验证码'||(state.time+' s')"></a-button>
-                </a-col>
-            </a-row>
+                            type="primary"
+                            htmlType="submit"
+                            class="register-button"
+                            :loading="registerBtn"
+                            @click.stop.prevent="handleSubmit"
+                            :disabled="registerBtn">注册
+                    </a-button>
+                    <router-link class="login" :to="{ name: 'login' }">使用已有账户登录</router-link>
+                </a-form-item>
 
-            <a-form-item>
-                <a-button
-                        size="large"
-                        type="primary"
-                        htmlType="submit"
-                        class="register-button"
-                        :loading="registerBtn"
-                        @click.stop.prevent="handleSubmit"
-                        :disabled="registerBtn">注册
-                </a-button>
-                <router-link class="login" :to="{ name: 'login' }">使用已有账户登录</router-link>
-            </a-form-item>
+            </a-form>
 
-        </a-form>
+            <BasicFooter/>
+        </div>
     </div>
 </template>
 
 <script>
   import {getSmsCaptcha} from '@/api/login'
+  import BasicHeader from "@/components/basic-header";
+  import BasicFooter from "@/components/basic-footer";
 
   const levelNames = {
     0: '低',
@@ -123,8 +125,8 @@
     3: '#52c41a'
   }
   export default {
-    name: 'Register',
-    components: {},
+    name: 'register',
+    components: {BasicFooter, BasicHeader},
     data() {
       return {
         form: this.$form.createForm(this),
@@ -203,11 +205,7 @@
       },
 
       handlePasswordInputClick() {
-        if (!this.isMobile()) {
-          this.state.passwordLevelChecked = true
-          return
-        }
-        this.state.passwordLevelChecked = false
+        this.state.passwordLevelChecked = true
       },
 
       handleSubmit() {
@@ -273,50 +271,28 @@
     }
   }
 </script>
-<style lang="less">
-    .user-register {
 
-        &.error {
-            color: #ff0000;
-        }
-
-        &.warning {
-            color: #ff7e05;
-        }
-
-        &.success {
-            color: #52c41a;
-        }
-
-    }
-
-    .user-layout-register {
-        .ant-input-group-addon:first-child {
-            background-color: #fff;
-        }
-    }
-</style>
 <style lang="less" scoped>
-    .user-layout-register {
+    .container {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: #f0f2f5 url(../assets/bg.svg) no-repeat;
 
-        & > h3 {
-            font-size: 16px;
-            margin-bottom: 20px;
-        }
+        .main {
+            height: 100%;
+            min-width: 260px;
+            width: 368px;
+            margin: 0 auto;
 
-        .getCaptcha {
-            display: block;
-            width: 100%;
-            height: 40px;
-        }
+            .register-button {
+                width: 50%;
+            }
 
-        .register-button {
-            width: 50%;
-        }
-
-        .login {
-            float: right;
-            line-height: 40px;
+            .login {
+                float: right;
+                line-height: 40px;
+            }
         }
     }
 </style>
