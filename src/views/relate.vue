@@ -6,7 +6,7 @@
                 <a-col>
                     <a-tabs
                             defaultActiveKey="1"
-                            :tabBarStyle="{ textAlign: 'left', borderBottom: 'unset' }"
+                            :tabBarStyle="{ textAlign: 'center', borderBottom: 'unset' }"
                     >
                         <a-tab-pane key="1" tab="绑定Stark账号">
                             <a-form
@@ -47,6 +47,14 @@
                                     >确定
                                     </a-button>
                                 </a-form-item>
+                                <a-form-item>
+                                    <router-link :to="{name:'login'}">返回</router-link>
+                                    <router-link
+                                            :to="{ name: 'register' }"
+                                            style="float: right;"
+                                    >还没有账号？立即注册
+                                    </router-link>
+                                </a-form-item>
                             </a-form>
                         </a-tab-pane>
                     </a-tabs>
@@ -61,6 +69,7 @@
   import BasicHeader from "@/components/basic-header";
 
   export default {
+    name: 'relate',
     components: {BasicFooter, BasicHeader}
   }
 </script>

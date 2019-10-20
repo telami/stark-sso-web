@@ -12,7 +12,7 @@
                 >
                     <a-tabs
                             :activeKey="customActiveKey"
-                            :tabBarStyle="{ textAlign: 'left', borderBottom: 'unset' }"
+                            :tabBarStyle="{ textAlign: 'center', borderBottom: 'unset' }"
                             @change="handleTabClick"
                     >
                         <a-tab-pane key="tab1" tab="用户名密码登录">
@@ -44,8 +44,8 @@
                                     <a-icon slot="prefix" type="lock" :style="{ color: 'rgba(0,0,0,.25)' }"/>
                                 </a-input>
                             </a-form-item>
-                            <a-row :gutter="16">
-                                <a-col class="gutter-row" :span="16">
+                            <a-row type="flex" justify="space-around" align="top">
+                                <a-col :span="16">
                                     <a-form-item>
                                         <a-input size="large" type="text" placeholder="验证码"
                                                  v-decorator="['imageCode', {rules: [{ required: true, message: '请输入验证码' }], validateTrigger: 'blur'}]">
@@ -53,8 +53,9 @@
                                         </a-input>
                                     </a-form-item>
                                 </a-col>
-                                <a-col class="gutter-row" :span="8">
-                                    <img :src="imageCode" :key="imageCodeKey" @click="getImage"/>
+                                <a-col :span="8" @click="getImage">
+                                    <img :src="imageCode" style="padding-left: 10px" height="40" width="120"
+                                         alt="出了点小故障" :key="imageCodeKey"/>
                                 </a-col>
                             </a-row>
                         </a-tab-pane>
@@ -106,7 +107,7 @@
                         <a-icon class="item-icon" type="dingding" @click="redirectToDingtalk"></a-icon>
                         <a-icon class="item-icon" type="qq" @click="redirectToQq"></a-icon>
                         <a-icon class="item-icon" type="dribbble" @click="redirectToOschina"></a-icon>
-                        <!--                        <router-link class="register" :to="{ name: 'register' }">注册账户</router-link>-->
+                        <router-link class="register" :to="{ name: 'register' }">注册账户</router-link>
                     </div>
                 </a-form>
             </a-row>
@@ -239,6 +240,9 @@
         getImageCode(this.deviceId).then((res) => {
           this.imageCode = 'data:image/jpg;base64,' + res.data;
           this.imageCodeKey = new Date().getTime();
+        }).catch(() => {
+          this.imageCode = '';
+          this.$message.error('获取图片验证码失败');
         });
       },
       getCaptcha(e) {
@@ -347,7 +351,7 @@
                     line-height: 22px;
 
                     .item-icon {
-                        font-size: 24px;
+                        font-size: 20px;
                         color: rgba(0, 0, 0, 0.2);
                         margin-left: 16px;
                         vertical-align: middle;
