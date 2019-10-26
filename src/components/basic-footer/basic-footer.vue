@@ -26,13 +26,9 @@
 
 <style lang="less" scoped>
     .footer {
-        padding: 0 16px;
+        padding-top: 10vh;
+        margin-bottom: 6vh;
         text-align: center;
-        position: fixed;
-        bottom: 4vh;
-        width: 368px;
-        color: rgba(0, 0, 0, 0.45);
-        font-size: 14px;
 
         .links {
             margin-bottom: 8px;

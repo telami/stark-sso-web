@@ -65,8 +65,8 @@
     </div>
 </template>
 <script>
-  import BasicFooter from "@/components/basic-footer";
-  import BasicHeader from "@/components/basic-header";
+  import BasicFooter from "@/components/basic-footer/basic-footer";
+  import BasicHeader from "@/components/basic-header/basic-header";
 
   export default {
     name: 'relate',

@@ -55,7 +55,7 @@
                                 </a-col>
                                 <a-col :span="8" @click="getImage">
                                     <img :src="imageCode" style="padding-left: 10px" height="40" width="120"
-                                         alt="出了点小故障" :key="imageCodeKey"/>
+                                         alt="图片加载失败" :key="imageCodeKey"/>
                                 </a-col>
                             </a-row>
                         </a-tab-pane>
@@ -118,8 +118,8 @@
 
 <script>
   import {login, loginMobile, getImageCode, getSmsCaptcha} from '../api/login'
-  import Footer from "@/components/basic-footer";
-  import BasicHeader from "@/components/basic-header";
+  import Footer from "@/components/basic-footer/basic-footer";
+  import BasicHeader from "@/components/basic-header/basic-header";
 
   const socialRedirectUrl = 'http://sso.dapideng.com/api/uaa';
 
