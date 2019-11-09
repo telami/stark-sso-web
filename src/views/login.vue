@@ -117,9 +117,10 @@
 </template>
 
 <script>
-  import {login, loginMobile, getImageCode, getSmsCaptcha} from '../api/login'
+  import {login, loginMobile, getImageCode, getSmsCaptcha, getLoginKey} from '../api/login'
   import Footer from "@/components/basic-footer/basic-footer";
   import BasicHeader from "@/components/basic-header/basic-header";
+  import JsEncrypt from 'jsencrypt';
 
   const socialRedirectUrl = 'http://sso.dapideng.com/api/uaa';
 
@@ -137,6 +138,7 @@
         imageCode: '',
         imageCodeKey: '',
         deviceId: '',
+        publicKey:'',
         state: {
           time: 60,
           loginBtn: false,
@@ -149,6 +151,9 @@
     mounted() {
       this.getOauth2Param();
       this.getImage();
+    },
+    created() {
+      this._getLoginKey()
     },
     methods: {
       handleSubmit(e) {
@@ -163,12 +168,14 @@
 
         const validateFieldsKey = customActiveKey === 'tab1' ? ['username', 'password', 'imageCode'] : ['mobile', 'smsCode']
 
+        let encrypt = new JsEncrypt();
+        encrypt.setPublicKey(this.publicKey)
         validateFields(validateFieldsKey, {force: true}, (err, values) => {
           if (!err) {
             const loginParams = {...values}
             if (this.state.loginType === 1) {
               loginParams.username = values.username
-              loginParams.password = values.password;
+              loginParams.password = encrypt.encrypt(values.password);
               loginParams.imageCode = values.imageCode;
               login(loginParams, this.oauth2Params, this.deviceId).then(res => {
                 if (res.code === 200) {
@@ -182,9 +189,9 @@
                   this.requestFailed(res)
                 }
               }).catch(err => this.requestFailed(err))
-                .finally(() => {
-                  state.loginBtn = false
-                })
+                  .finally(() => {
+                    state.loginBtn = false
+                  })
             } else {
               loginParams.mobile = values.mobile
               loginParams.smsCode = values.smsCode
@@ -200,9 +207,9 @@
                   this.requestFailed(res)
                 }
               }).catch(err => this.requestFailed(err))
-                .finally(() => {
-                  state.loginBtn = false
-                })
+                  .finally(() => {
+                    state.loginBtn = false
+                  })
             }
 
           } else {
@@ -219,6 +226,11 @@
       },
       loginSuccess() {
         this.$router.push({name: 'about'})
+      },
+      _getLoginKey(){
+        getLoginKey().then(res => {
+          this.publicKey = res.data
+        })
       },
       requestFailed(err) {
         this.getImage();

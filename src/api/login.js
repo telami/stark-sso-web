@@ -111,3 +111,10 @@ export function register(params, deviceId) {
         data: params
     })
 }
+
+export function getLoginKey() {
+    return axios({
+        url: '/user/key',
+        method: 'get'
+    })
+}

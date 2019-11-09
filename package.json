@@ -13,7 +13,8 @@
     "less": "^3.10.3",
     "less-loader": "^5.0.0",
     "vue": "^2.6.10",
-    "vue-router": "^3.0.3"
+    "vue-router": "^3.0.3",
+    "jsencrypt": "^3.0.0-rc.1"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.11.0",
